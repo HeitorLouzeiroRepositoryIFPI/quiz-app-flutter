@@ -13,7 +13,10 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   late int _timer;
   int _currentFlag = 0;
+  int _correctCount = 0;
+  int _wrongCount = 0;
   List _flags = [];
+  List _options = [];
   bool _isTimerRunning = true;
 
   @override
@@ -28,13 +31,30 @@ class _QuizPageState extends State<QuizPage> {
     final jsonString = await rootBundle.loadString('utils/paises.json');
     final jsonMap = jsonDecode(jsonString);
 
-    // Acesse a lista de bandeiras na chave "paises"
     if (jsonMap is Map && jsonMap.containsKey('paises')) {
+      final paises = List<Map<String, dynamic>>.from(jsonMap['paises']);
       setState(() {
-        _flags = jsonMap['paises'];
+        _flags = paises;
+        _generateOptions();
       });
     } else {
       throw Exception('Erro ao carregar o JSON.');
+    }
+  }
+
+  void _generateOptions() {
+    if (_flags.isNotEmpty) {
+      final currentFlag = _flags[_currentFlag];
+      final incorrectOptions = List<Map<String, dynamic>>.from(_flags)
+        ..remove(currentFlag)
+        ..shuffle();
+
+      setState(() {
+        _options = [
+          currentFlag,
+          ...incorrectOptions.take(3),
+        ]..shuffle();
+      });
     }
   }
 
@@ -57,7 +77,22 @@ class _QuizPageState extends State<QuizPage> {
   void _nextFlag() {
     setState(() {
       _currentFlag = (_currentFlag + 1) % _flags.length;
+      _generateOptions();
     });
+  }
+
+  void _checkAnswer(Map<String, dynamic> selectedOption) {
+    final correctAnswer = _flags[_currentFlag];
+    if (selectedOption['nome'] == correctAnswer['nome']) {
+      setState(() {
+        _correctCount++;
+      });
+    } else {
+      setState(() {
+        _wrongCount++;
+      });
+    }
+    _nextFlag();
   }
 
   @override
@@ -72,27 +107,43 @@ class _QuizPageState extends State<QuizPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Bandeira:", style: TextStyle(fontSize: 24)),
-                  const SizedBox(height: 20),
-                  Image.asset(
-                    _flags[_currentFlag]['bandeira'], // Mostra a bandeira
-                    width: 150,
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        "Acertos: $_correctCount",
+                        style: const TextStyle(fontSize: 18, color: Colors.green),
+                      ),
+                      Text(
+                        "Erros: $_wrongCount",
+                        style: const TextStyle(fontSize: 18, color: Colors.red),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
-                  Text(
-                    _flags[_currentFlag]['nome'], // Mostra o nome do país
-                    style: const TextStyle(fontSize: 20),
+                  const Flexible(
+                    child: Text("Bandeira:", style: TextStyle(fontSize: 24)),
                   ),
                   const SizedBox(height: 20),
-                  Text(
-                    "Tempo restante: $_timer s",
-                    style: const TextStyle(fontSize: 20),
+                  Expanded(
+                    child: Image.asset(
+                      _flags[_currentFlag]['bandeira'],
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _nextFlag,
-                    child: const Text("Próxima"),
-                  ),
+                  ..._options.map((option) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5.0),
+                      child: ElevatedButton(
+                        onPressed: () => _checkAnswer(option),
+                        child: Text(option['nome']),
+                      ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),
