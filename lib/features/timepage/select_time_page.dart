@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quizz_app_flutter/features/quiz/quiz_page.dart';
 
 class SelectTimePage extends StatefulWidget {
   const SelectTimePage({super.key});
@@ -44,12 +45,12 @@ class _SelectTimePageState extends State<SelectTimePage> {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                /*               Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => OnboardingPage(timer: _selectedTime),
+                    builder: (context) => QuizPage(timer: _selectedTime),
                   ),
-                );*/
+                );
               },
               child: const Text("Continuar"),
             ),
