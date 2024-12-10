@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:quizz_app_flutter/features/result/result_page.dart';
 
 class QuizPage extends StatefulWidget {
   final int timer;
@@ -68,10 +69,20 @@ class _QuizPageState extends State<QuizPage> {
       });
     } else if (_timer == 0) {
       _isTimerRunning = false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tempo esgotado!')),
-      );
+      _navigateToResults();
     }
+  }
+
+  void _navigateToResults() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultPage(
+          correctCount: _correctCount,
+          wrongCount: _wrongCount,
+        ),
+      ),
+    );
   }
 
   void _nextFlag() {
@@ -99,7 +110,7 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Questionário de Bandeiras"),
+        title: const Text("Flags Play"),
       ),
       body: _flags.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -122,17 +133,32 @@ class _QuizPageState extends State<QuizPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Flexible(
-                    child: Text("Bandeira:", style: TextStyle(fontSize: 24)),
-                  ),
+                  const Text("Bandeira:", style: TextStyle(fontSize: 24)),
                   const SizedBox(height: 20),
-                  Expanded(
-                    child: Image.asset(
-                      _flags[_currentFlag]['bandeira'],
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.contain,
-                    ),
+                  Column(
+                    children: [
+                      Image.asset(
+                        _flags[_currentFlag]['bandeira'],
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: Text(
+                            "Tempo: $_timer s",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   ..._options.map((option) {
@@ -143,7 +169,7 @@ class _QuizPageState extends State<QuizPage> {
                         child: Text(option['nome']),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
