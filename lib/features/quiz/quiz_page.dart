@@ -13,7 +13,7 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   late int _timer;
-  int _currentFlag = 0;
+  int _currentFlagIndex = 0;
   int _correctCount = 0;
   int _wrongCount = 0;
   List _flags = [];
@@ -34,6 +34,7 @@ class _QuizPageState extends State<QuizPage> {
 
     if (jsonMap is Map && jsonMap.containsKey('paises')) {
       final paises = List<Map<String, dynamic>>.from(jsonMap['paises']);
+      paises.shuffle(); // Embaralha as bandeiras ao carregar
       setState(() {
         _flags = paises;
         _generateOptions();
@@ -45,7 +46,7 @@ class _QuizPageState extends State<QuizPage> {
 
   void _generateOptions() {
     if (_flags.isNotEmpty) {
-      final currentFlag = _flags[_currentFlag];
+      final currentFlag = _flags[_currentFlagIndex];
       final incorrectOptions = List<Map<String, dynamic>>.from(_flags)
         ..remove(currentFlag)
         ..shuffle();
@@ -54,7 +55,7 @@ class _QuizPageState extends State<QuizPage> {
         _options = [
           currentFlag,
           ...incorrectOptions.take(3),
-        ]..shuffle();
+        ]..shuffle(); // Embaralha as opções para exibição
       });
     }
   }
@@ -87,13 +88,17 @@ class _QuizPageState extends State<QuizPage> {
 
   void _nextFlag() {
     setState(() {
-      _currentFlag = (_currentFlag + 1) % _flags.length;
+      _currentFlagIndex++;
+      if (_currentFlagIndex >= _flags.length) {
+        _flags.shuffle(); // Embaralha novamente ao completar o ciclo
+        _currentFlagIndex = 0;
+      }
       _generateOptions();
     });
   }
 
   void _checkAnswer(Map<String, dynamic> selectedOption) {
-    final correctAnswer = _flags[_currentFlag];
+    final correctAnswer = _flags[_currentFlagIndex];
     if (selectedOption['nome'] == correctAnswer['nome']) {
       setState(() {
         _correctCount++;
@@ -138,7 +143,7 @@ class _QuizPageState extends State<QuizPage> {
                   Column(
                     children: [
                       Image.asset(
-                        _flags[_currentFlag]['bandeira'],
+                        _flags[_currentFlagIndex]['bandeira'],
                         width: 150,
                         height: 150,
                         fit: BoxFit.contain,
