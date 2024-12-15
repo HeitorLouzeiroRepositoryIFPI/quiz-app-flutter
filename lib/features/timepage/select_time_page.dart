@@ -23,6 +23,7 @@ class _SelectTimePageState extends State<SelectTimePage> {
       appBar: AppBar(
         title: const Text("Selecione o Tempo"),
       ),
+      backgroundColor: Colors.blueGrey[50],
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

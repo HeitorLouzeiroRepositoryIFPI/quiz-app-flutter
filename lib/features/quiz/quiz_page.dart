@@ -116,6 +116,7 @@ class _QuizPageState extends State<QuizPage> {
       appBar: AppBar(
         title: const Text("Flags Play"),
       ),
+      backgroundColor: Colors.blueGrey[50], // Define a cor de fundo aqui
       body: _flags.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : Center(
