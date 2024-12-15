@@ -13,7 +13,7 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   late int _timer;
-  int _currentFlagIndex = 0;
+  int _currentFlag = 0;
   int _correctCount = 0;
   int _wrongCount = 0;
   List _flags = [];
@@ -34,7 +34,7 @@ class _QuizPageState extends State<QuizPage> {
 
     if (jsonMap is Map && jsonMap.containsKey('paises')) {
       final paises = List<Map<String, dynamic>>.from(jsonMap['paises']);
-      paises.shuffle(); // Embaralha as bandeiras ao carregar
+      paises.shuffle(); // Embaralha as bandeiras para exibição randômica
       setState(() {
         _flags = paises;
         _generateOptions();
@@ -46,7 +46,7 @@ class _QuizPageState extends State<QuizPage> {
 
   void _generateOptions() {
     if (_flags.isNotEmpty) {
-      final currentFlag = _flags[_currentFlagIndex];
+      final currentFlag = _flags[_currentFlag];
       final incorrectOptions = List<Map<String, dynamic>>.from(_flags)
         ..remove(currentFlag)
         ..shuffle();
@@ -55,7 +55,7 @@ class _QuizPageState extends State<QuizPage> {
         _options = [
           currentFlag,
           ...incorrectOptions.take(3),
-        ]..shuffle(); // Embaralha as opções para exibição
+        ]..shuffle(); // Embaralha as opções
       });
     }
   }
@@ -88,17 +88,13 @@ class _QuizPageState extends State<QuizPage> {
 
   void _nextFlag() {
     setState(() {
-      _currentFlagIndex++;
-      if (_currentFlagIndex >= _flags.length) {
-        _flags.shuffle(); // Embaralha novamente ao completar o ciclo
-        _currentFlagIndex = 0;
-      }
+      _currentFlag = (_currentFlag + 1) % _flags.length;
       _generateOptions();
     });
   }
 
   void _checkAnswer(Map<String, dynamic> selectedOption) {
-    final correctAnswer = _flags[_currentFlagIndex];
+    final correctAnswer = _flags[_currentFlag];
     if (selectedOption['nome'] == correctAnswer['nome']) {
       setState(() {
         _correctCount++;
@@ -143,7 +139,7 @@ class _QuizPageState extends State<QuizPage> {
                   Column(
                     children: [
                       Image.asset(
-                        _flags[_currentFlagIndex]['bandeira'],
+                        _flags[_currentFlag]['bandeira'],
                         width: 150,
                         height: 150,
                         fit: BoxFit.contain,
@@ -167,11 +163,27 @@ class _QuizPageState extends State<QuizPage> {
                   ),
                   const SizedBox(height: 20),
                   ..._options.map((option) {
+                    final colorOptions = [Colors.blue, Colors.orange, Colors.green, Colors.purple];
+                    final buttonColor = colorOptions[_options.indexOf(option) % colorOptions.length];
+
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5.0),
                       child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          fixedSize: const Size(200, 50), // Tamanho fixo
+                          backgroundColor: buttonColor, // Cor dinâmica
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                         onPressed: () => _checkAnswer(option),
-                        child: Text(option['nome']),
+                        child: Text(
+                          option['nome'],
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     );
                   }),
