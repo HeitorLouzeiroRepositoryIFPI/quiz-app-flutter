@@ -109,6 +109,10 @@ class _QuizPageState extends State<QuizPage> {
 
   @override
   Widget build(BuildContext context) {
+    double totalAnswered = (_correctCount + _wrongCount).toDouble();
+    double correctPercentage = totalAnswered > 0 ? _correctCount / totalAnswered : 0;
+    double wrongPercentage = totalAnswered > 0 ? _wrongCount / totalAnswered : 0;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Flags Play"),
@@ -120,16 +124,45 @@ class _QuizPageState extends State<QuizPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Acertos: $_correctCount",
-                        style: const TextStyle(fontSize: 18, color: Colors.green),
+                        "Desempenho:",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      Text(
-                        "Erros: $_wrongCount",
-                        style: const TextStyle(fontSize: 18, color: Colors.red),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Barra de progresso para acertos e erros
+                      Expanded(
+                        child: LinearProgressIndicator(
+                          value: correctPercentage,
+                          minHeight: 15, // Diminuir a altura da barra de progresso
+                          color: Colors.green,
+                          backgroundColor: Colors.red.withOpacity(0.5),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Ícones de acertos e erros
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.check_circle, color: Colors.green),
+                              Text(" $_correctCount", style: const TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Icon(Icons.cancel, color: Colors.red),
+                              Text(" $_wrongCount", style: const TextStyle(fontSize: 16)),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -140,8 +173,8 @@ class _QuizPageState extends State<QuizPage> {
                     children: [
                       Image.asset(
                         _flags[_currentFlag]['bandeira'],
-                        width: 150,
-                        height: 150,
+                        width: 120, // Reduzir a largura da imagem
+                        height: 120, // Reduzir a altura da imagem
                         fit: BoxFit.contain,
                       ),
                       const SizedBox(height: 10),
@@ -162,31 +195,40 @@ class _QuizPageState extends State<QuizPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  ..._options.map((option) {
-                    final colorOptions = [Colors.blue, Colors.orange, Colors.green, Colors.purple];
-                    final buttonColor = colorOptions[_options.indexOf(option) % colorOptions.length];
+                  // Botões de resposta
+                  Expanded(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: _options.map((option) {
+                        final colorOptions = [Colors.blue, Colors.orange, Colors.green, Colors.purple];
+                        final buttonColor = colorOptions[_options.indexOf(option) % colorOptions.length];
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(200, 50), // Tamanho fixo
-                          backgroundColor: buttonColor, // Cor dinâmica
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Container(
+                            alignment: Alignment.center, // Alinha os botões ao centro
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size(300, 45), // Tamanho ajustado para 300
+                                backgroundColor: buttonColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              onPressed: () => _checkAnswer(option),
+                              child: Text(
+                                option['nome'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        onPressed: () => _checkAnswer(option),
-                        child: Text(
-                          option['nome'],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ],
               ),
             ),
