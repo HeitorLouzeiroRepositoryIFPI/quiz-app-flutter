@@ -9,7 +9,13 @@ class SelectTimePage extends StatefulWidget {
 }
 
 class _SelectTimePageState extends State<SelectTimePage> {
-  int _selectedTime = 30; // Tempo inicial selecionado
+  // Opções de tempo em um mapa
+  final List<Map<String, dynamic>> timeOptions = [
+    {'label': '30s', 'value': 30},
+    {'label': '60s', 'value': 60},
+    {'label': '3m', 'value': 180},
+    {'label': '5m', 'value': 300},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -26,33 +32,22 @@ class _SelectTimePageState extends State<SelectTimePage> {
               style: TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () => setState(() => _selectedTime = 30),
-              child: _buildTimerOption("30s", _selectedTime == 30),
-            ),
-            GestureDetector(
-              onTap: () => setState(() => _selectedTime = 60),
-              child: _buildTimerOption("60s", _selectedTime == 60),
-            ),
-            GestureDetector(
-              onTap: () => setState(() => _selectedTime = 180),
-              child: _buildTimerOption("3m", _selectedTime == 180),
-            ),
-            GestureDetector(
-              onTap: () => setState(() => _selectedTime = 300),
-              child: _buildTimerOption("5m", _selectedTime == 300),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => QuizPage(timer: _selectedTime),
-                  ),
+            // Gerando opções dinamicamente
+            Column(
+              children: timeOptions.map((option) {
+                return InkWell(
+                  onTap: () {
+                    // Navega para a próxima página com o tempo selecionado
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QuizPage(timer: option['value']),
+                      ),
+                    );
+                  },
+                  child: _buildTimerOption(option['label']),
                 );
-              },
-              child: const Text("Continuar"),
+              }).toList(),
             ),
           ],
         ),
@@ -61,18 +56,24 @@ class _SelectTimePageState extends State<SelectTimePage> {
   }
 
   // Método para construir a opção de tempo
-  Widget _buildTimerOption(String label, bool isSelected) {
+  Widget _buildTimerOption(String label) {
     return Container(
       width: 150,
       height: 50,
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.lightBlue.shade300 : Colors.lightBlue.shade100,
+        color: Theme.of(context).primaryColorLight,
         border: Border.all(color: Colors.black),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(
-        child: Text(label, style: const TextStyle(fontSize: 20)),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 20,
+            color: Colors.black,
+          ),
+        ),
       ),
     );
   }
