@@ -111,7 +111,6 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     double totalAnswered = (_correctCount + _wrongCount).toDouble();
     double correctPercentage = totalAnswered > 0 ? _correctCount / totalAnswered : 0;
-    double wrongPercentage = totalAnswered > 0 ? _wrongCount / totalAnswered : 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -143,7 +142,7 @@ class _QuizPageState extends State<QuizPage> {
                           value: correctPercentage,
                           minHeight: 15, // Diminuir a altura da barra de progresso
                           color: Colors.green,
-                          backgroundColor: Colors.red.withOpacity(0.5),
+                          backgroundColor: Colors.red.withAlpha((255 * 0.5).toInt()),
                         ),
                       ),
                       const SizedBox(width: 10),
